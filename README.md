@@ -11,7 +11,7 @@
 # Install
 
 ```
-git clone git@gitlab.com:ira-labs/projects/products/lymph-nodes.git
-./lymph-nodes/install.sh
+git clone git@gitlab.com:Yaroslav-Tominin/PSC
+./PSC/install.sh
 ```
 
