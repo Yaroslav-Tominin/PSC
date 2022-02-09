@@ -20,18 +20,18 @@ import torch
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
-#common_voice_train = load_dataset("common_voice", "br", split="train+validation")
-#common_voice_test = load_dataset("common_voice", "br", split="test")
+common_voice_train = load_dataset("common_voice", "br", split="train+validation")
+common_voice_test = load_dataset("common_voice", "br", split="test")
 #common_voice_train = load_dataset("br", data_files = ["train.tsv","validated.tsv"], split = "train+validation")
 #common_voice_test = load_dataset("br", data_files = "test.tsv", split = "test")
-common_voice_train = pd.read_csv("br/train.tsv", sep = "\t")[:10]
-common_voice_test = pd.read_csv("br/test.tsv", sep = "\t")[:10]   
+#common_voice_train = pd.read_csv("br/train.tsv", sep = "\t")[:10]
+#common_voice_test = pd.read_csv("br/test.tsv", sep = "\t")[:10]   
 
-common_voice_train = Dataset.from_pandas(common_voice_train)
-common_voice_test = Dataset.from_pandas(common_voice_test)
+#common_voice_train = Dataset.from_pandas(common_voice_train)
+#common_voice_test = Dataset.from_pandas(common_voice_test)
 common_voice_train = common_voice_train.remove_columns(["accent", "age", "client_id", "down_votes", "gender", "locale", "segment", "up_votes"])
 common_voice_test = common_voice_test.remove_columns(["accent", "age", "client_id", "down_votes", "gender", "locale", "segment", "up_votes"])
-
+"""
 train_dict = json.load(open("train.json"))
 test_dict = json.load(open("test.json"))
 audio_train = []
@@ -43,7 +43,7 @@ for clip in common_voice_test["path"]:
     
 common_voice_train = common_voice_train.add_column("audio", np.array(audio_train))
 common_voice_test = common_voice_test.add_column("audio", np.array(audio_test))
-
+"""
 def show_random_elements(dataset, num_examples=10):
     assert num_examples <= len(dataset), "Can't pick more elements than there are in the dataset."
     picks = []
@@ -256,7 +256,7 @@ trainer = Trainer(
     tokenizer=processor.feature_extractor,
 )
 #trainer.train()
-
+"""
 input_dict = processor(common_voice_test[9]["input_values"], return_tensors="pt", padding=True)
 print(input_dict)
 logits = model(input_dict.input_values).logits
@@ -264,3 +264,14 @@ print(logits)
 pred_ids = torch.argmax(logits, dim=-1)[0]
 print(pred_ids)
 print(processor.decode(pred_ids))
+"""
+test_dataset = load_dataset("hf-internal-testing/librispeech_asr_demo", "clean", split="validation")
+audio_sample = test_dataset[2]
+with torch.no_grad():
+    inputs = processor(audio_sample["audio"]["array"], return_tensors="pt", padding=True)
+logits = model(**inputs).logits
+predicted_ids = torch.argmax(logits, dim=-1)
+transcription = processor.batch_decode(predicted_ids)
+
+print(transcription[0].lower())
+print(transcription)
