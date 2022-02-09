@@ -1,8 +1,6 @@
 datasets
-ipython
 librosa
 numpy
 pandas
-setuptools
-torch
+pytorch
 transformers
