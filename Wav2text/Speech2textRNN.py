@@ -319,9 +319,8 @@ def main(experiment,learning_rate=5e-4, batch_size=20, epochs=10,
     if not os.path.isdir("./data"):
         os.makedirs("./data")
 
-    train_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=train_url)
-    test_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=test_url)
-
+    train_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=train_url, download = True)
+    test_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=test_url, download = True)
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     train_loader = data.DataLoader(dataset=train_dataset,
                                 batch_size=hparams['batch_size'],
