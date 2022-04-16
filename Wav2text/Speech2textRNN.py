@@ -4,7 +4,8 @@ Created on Sat Apr 16 20:09:02 2022
 
 @author: antoi
 """
-
+import comet_ml
+from comet_ml import Experiment
 import torchaudio
 import torch
 import torch.nn as nn
@@ -12,7 +13,6 @@ import torch.optim as optim
 import torch.utils.data as data
 import os
 import torch.nn.functional as F
-from comet_ml import Experiment
 
 char_map_str = """
  ' 0
