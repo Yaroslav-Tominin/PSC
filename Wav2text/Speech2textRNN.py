@@ -231,10 +231,13 @@ class IterMeter(object):
         return self.val
 
 
-def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment = None):
+def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment):
     model.train()
+    print("starting training")
     data_len = len(train_loader.dataset)
+    
     with experiment.train():
+        print("in exp")
         for batch_idx, _data in enumerate(train_loader):
             spectrograms, labels, input_lengths, label_lengths = _data 
             spectrograms, labels = spectrograms.to(device), labels.to(device)
@@ -260,7 +263,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
                     100. * batch_idx / len(train_loader), loss.item()))
     
     
-def test(model, device, test_loader, criterion, epoch, iter_meter, experiment = None):
+def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
     print('\nevaluating…')
     model.eval()
     test_loss = 0
@@ -292,14 +295,9 @@ def test(model, device, test_loader, criterion, epoch, iter_meter, experiment = 
 
     print('Test set: Average loss: {:.4f}, Average CER: {:4f} Average WER: {:.4f}\n'.format(test_loss, avg_cer, avg_wer))
 
-def main(learning_rate=5e-4, batch_size=20, epochs=10,
+def main(experiment,learning_rate=5e-4, batch_size=20, epochs=10,
     train_url="train-clean-100", test_url="test-clean"):
     
-    experiment = Experiment(
-    api_key="3R2GzsUplN6iNSQJFeYBO0gD4",
-    project_name="le-psc",
-    workspace="antoinemsy",
-)
     hparams = {
         "n_cnn_layers": 3,
         "n_rnn_layers": 5,
@@ -321,8 +319,8 @@ def main(learning_rate=5e-4, batch_size=20, epochs=10,
     if not os.path.isdir("./data"):
         os.makedirs("./data")
 
-    train_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=train_url, download=True)
-    test_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=test_url, download=True)
+    train_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=train_url)
+    test_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=test_url)
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     train_loader = data.DataLoader(dataset=train_dataset,
@@ -353,8 +351,16 @@ def main(learning_rate=5e-4, batch_size=20, epochs=10,
 
     iter_meter = IterMeter()
     for epoch in range(1, epochs + 1):
-        train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, Experiment)
-        test(model, device, test_loader, criterion, epoch, iter_meter, Experiment)
+        "in epoch"
+        train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment)
+        test(model, device, test_loader, criterion, epoch, iter_meter, experiment)
         
 if __name__ == "__main__":
-    main()
+    print("starting script")
+    experiment = Experiment(
+    api_key="3R2GzsUplN6iNSQJFeYBO0gD4",
+    project_name="le-psc",
+    workspace="antoinemsy",
+)
+    print("experiment loaded")
+    main(experiment)
