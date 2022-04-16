@@ -260,7 +260,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
                     100. * batch_idx / len(train_loader), loss.item()))
     
     
-    def test(model, device, test_loader, criterion, epoch, iter_meter, experiment = None):
+def test(model, device, test_loader, criterion, epoch, iter_meter, experiment = None):
     print('\nevaluating…')
     model.eval()
     test_loss = 0
