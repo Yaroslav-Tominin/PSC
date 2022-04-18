@@ -4,7 +4,6 @@ Created on Sat Apr 16 20:09:02 2022
 
 @author: antoi
 """
-import comet_ml
 from comet_ml import Experiment
 import torchaudio
 import torch
@@ -276,6 +275,7 @@ train_audio_transforms = nn.Sequential(
 valid_audio_transforms = nn.Sequential(Add_noise(),torchaudio.transforms.MelSpectrogram())
 
 text_transform = TextTransform(char_map_str)
+
 """
 import librosa
 from matplotlib import pyplot as plt
@@ -299,8 +299,6 @@ def data_processing(data, data_type="train"):
     label_lengths = []
     for (waveform, _, utterance, _, _, _) in data:
         if data_type == 'train':
-            noise = Add_noise()
-            test = noise.__call__(waveform)
             spec = train_audio_transforms(waveform).squeeze(0).transpose(0, 1)
         else:
             spec = valid_audio_transforms(waveform).squeeze(0).transpose(0, 1)
@@ -424,6 +422,7 @@ def GreedyDecoder(output, labels, label_lengths, blank_label=28, collapse_repeat
                 decode.append(index.item())
         decodes.append(text_transform.int_to_text(decode))
     return decodes, targets
+
 """
 import cloudpickle as pickle
 from google.colab import files
@@ -552,6 +551,7 @@ def main(experiment,learning_rate=5e-4, batch_size=20, epochs=10,
         hparams['n_cnn_layers'], hparams['n_rnn_layers'], hparams['rnn_dim'],
         hparams['n_class'], hparams['n_feats'], hparams['stride'], hparams['dropout']
         ).to(device)
+    
     #print(next(iter(train_loader))[3])
     #print(plot_spectrogram(next(iter(train_loader))[0][0][0]))
     #print(model)
