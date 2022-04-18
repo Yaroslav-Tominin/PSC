@@ -72,8 +72,8 @@ class DConv(nn.Module):
 class doubleBLSTM(nn.Module):
     def __init__(self):
         super(doubleBLSTM,self).__init__()
-        self.hidden_size = 256
-        self.lstm = nn.LSTM(input_size = 512,  hidden_size = self.hidden_size, num_layers = 2,
+        self.hidden_size = 128
+        self.lstm = nn.LSTM(input_size = 256,  hidden_size = self.hidden_size, num_layers = 2,
                                bidirectional= True, batch_first=True)
         
         self.device = t.device('cuda:0' if t.cuda.is_available() else 'cpu')
@@ -138,7 +138,7 @@ class DCRN(nn.Module):
         ln = 0
         for x in self.encoder:
             y = x(y)
-            
+            print(y.shape)
             saved.append(y)
             
         print("lstm")   
@@ -157,16 +157,16 @@ class DCRN(nn.Module):
         """
         return y
     
-standard_enc = {"fbins" : [256,128,64,32,16,8,4,2,1], "channels" : [1,32,32,32,32,64,128,256,512]}
-standard_dec = {"fbins" : [1,4,8,16,32,64,128,256,256], "channels" : [512,256,128,64,32,32,32,32,1]}
+standard_enc = {"fbins" : [128,64,32,16,8,4,2,1], "channels" : [1,32,32,32,32,64,128,256,512]}
+standard_dec = {"fbins" : [1,4,8,16,32,64,128,256], "channels" : [256,128,64,32,32,32,32,1]}
     
 
 def test():
     model = DCRN(standard_enc, standard_dec)
-    x = t.randn((16,1,40,256))
+    x = t.randn((16,1,40,128))
     out = model.forward(x)
     
     print(type(out))
     print(out.shape)
-
-test()
+if __name__ == "__main__":
+    test()
