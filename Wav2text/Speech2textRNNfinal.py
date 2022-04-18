@@ -423,7 +423,7 @@ def GreedyDecoder(output, labels, label_lengths, blank_label=28, collapse_repeat
                 decode.append(index.item())
         decodes.append(text_transform.int_to_text(decode))
     return decodes, targets
-
+"""
 import cloudpickle as pickle
 from google.colab import files
 
@@ -431,7 +431,8 @@ def torch_saver(net,file="temp"):
   with open(file,'wb') as f:
     pickle.dump(net,f)
     files.download(file)
-    
+"""
+
 class IterMeter(object):
     """keeps track of total iterations"""
     def __init__(self):
@@ -567,7 +568,7 @@ def main(experiment,learning_rate=5e-4, batch_size=20, epochs=10,
     for epoch in range(1, epochs + 1):
         train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment)
         test(model, device, test_loader, criterion, epoch, iter_meter, experiment)
-    torch_saver(model)
+    #torch_saver(model)
     
 if __name__ == "__main__":
     print("starting script")
