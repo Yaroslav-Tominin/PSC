@@ -132,12 +132,12 @@ def main(experiment,learning_rate=5e-4, batch_size=20, epochs=2,
 
     experiment.log_parameters(hparams)
     use_cuda = torch.cuda.is_available()
-    torch.manual_seed(7)
-    device = torch.device("cuda:0" if use_cuda else "cpu")
+    device = torch.device("cuda" if use_cuda else "cpu")
 
     if not os.path.isdir("./data"):
         os.makedirs("./data")
-    model = DCRN(standard_enc,standard_dec).to(device)
+    model = DCRN(standard_enc,standard_dec)
+    model.to(device)
     x = torch.randn((16,1,40,128)).to(device)
     print(type(x))
     out = model(x)
