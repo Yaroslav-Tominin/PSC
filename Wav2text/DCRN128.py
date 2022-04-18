@@ -126,7 +126,7 @@ class DCRN(nn.Module):
         self.lastcell = nn.Sequential(DConv(32, 1,256))
         
     def forward(self,batch_data):
-        y = t.tensor(batch_data).to(self.device)
+        y = batch_data
         saved = []
         ln = 0
         for x in self.encoder:
