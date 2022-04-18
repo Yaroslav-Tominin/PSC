@@ -138,7 +138,7 @@ def test():
     params = model.parameters()
     print(type(model(x)))
     model.cuda()
-    x.cuda()
+    x = x.cuda()
     print(type(model(x)))
     #out = model.forward(x)
     
