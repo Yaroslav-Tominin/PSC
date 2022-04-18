@@ -55,7 +55,7 @@ class DConv(nn.Module):
         self.relu = nn.ReLU()
         
     def forward(self,batch_data):
-        batch_data.float()
+        #batch_data.float()
         output = self.conv(batch_data)
         output = self.ln(output)
         output = self.relu(output)
@@ -72,12 +72,12 @@ class doubleBLSTM(nn.Module):
         self.device = t.device('cuda:0' if t.cuda.is_available() else 'cpu')
        
     def forward(self, batch_data):
-        print(batch_data.shape)
+        #print(batch_data.shape)
         batch_data = batch_data.squeeze(3).transpose(1,2)
-        print(batch_data.shape)
+        #print(batch_data.shape)
         output , _ = self.lstm(batch_data)
         output = output[None,:].transpose(0,1).transpose(1,3)
-        print(output.shape)
+        #print(output.shape)
         return output
     
 class DCRN(nn.Module):
@@ -131,18 +131,18 @@ class DCRN(nn.Module):
         ln = 0
         for x in self.encoder:
             y = x(y)
-            print(y.shape)
+            #print(y.shape)
             saved.append(y)
             
-        print("lstm")   
+        #print("lstm")   
         y = self.lstm(y)
-        print("decoder")
+        #print("decoder")
         for x in self.decoder:
             e_con = saved.pop()
             ln+=1
             y = t.cat((y,e_con), 3)
             y = x(y)
-            print(y.shape)
+            #print(y.shape)
         """
         e_con = saved.pop()
         y = t.cat((y,e_con), 3)
