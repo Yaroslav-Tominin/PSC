@@ -136,9 +136,10 @@ def test():
     model = DCRN(standard_enc, standard_dec)
     x = t.randn((16,1,40,128))
     params = model.parameters()
-    print(type(next(iter(params))[0].data))
+    print(type(model(x)))
     model.cuda()
-    print(type(next(iter(params))[0].data))
+    x.cuda()
+    print(type(model(x)))
     #out = model.forward(x)
     
     #print(type(out))
