@@ -9,13 +9,6 @@ Created on Sun Apr 17 22:13:27 2022
 import torch as t
 import torch.nn as nn
 
-import json
-a_dict = json.load(open("test.json"))
-
-
-test_audio = t.tensor(a_dict["common_voice_br_17977507.mp3"])
-
-
 class EConv(nn.Module):
     #Conv followed by batch norm and ReLU
     def __init__(self, 
@@ -168,5 +161,6 @@ def test():
     
     print(type(out))
     print(out.shape)
+    
 if __name__ == "__main__":
     test()
