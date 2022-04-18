@@ -276,7 +276,7 @@ train_audio_transforms = nn.Sequential(
 valid_audio_transforms = nn.Sequential(Add_noise(),torchaudio.transforms.MelSpectrogram())
 
 text_transform = TextTransform(char_map_str)
-
+"""
 import librosa
 from matplotlib import pyplot as plt
 
@@ -290,6 +290,7 @@ def plot_spectrogram(spec, title=None, ylabel='freq_bin', aspect='auto', xmax=No
     axs.set_xlim((0, xmax))
   fig.colorbar(im, ax=axs)
   plt.show(block=False)
+"""
 
 def data_processing(data, data_type="train"):
     spectrograms = []
