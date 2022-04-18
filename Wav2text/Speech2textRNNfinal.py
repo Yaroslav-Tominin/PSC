@@ -273,7 +273,7 @@ train_audio_transforms = nn.Sequential(
     torchaudio.transforms.TimeMasking(time_mask_param=35)
 )
 
-valid_audio_transforms = nn.sequential(Add_noise(),torchaudio.transforms.MelSpectrogram())
+valid_audio_transforms = nn.Sequential(Add_noise(),torchaudio.transforms.MelSpectrogram())
 
 text_transform = TextTransform(char_map_str)
 
