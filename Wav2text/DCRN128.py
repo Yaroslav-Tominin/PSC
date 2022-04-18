@@ -135,10 +135,14 @@ standard_dec = {"fbins" : [1,4,8,16,32,64,128,256], "channels" : [256,128,64,32,
 def test():
     model = DCRN(standard_enc, standard_dec)
     x = t.randn((16,1,40,128))
-    out = model.forward(x)
+    params = model.parameters()
+    print(type(next(iter(params))[0].data))
+    model.cuda()
+    print(type(next(iter(params))[0].data))
+    #out = model.forward(x)
     
-    print(type(out))
-    print(out.shape)
+    #print(type(out))
+    #print(out.shape)
     
 if __name__ == "__main__":
     test()
