@@ -137,7 +137,13 @@ def main(experiment,learning_rate=5e-4, batch_size=20, epochs=2,
 
     if not os.path.isdir("./data"):
         os.makedirs("./data")
-
+    model = DCRN(standard_enc,standard_dec)
+    model.to(device)
+    x = torch.randn((16,1,40,128))
+    x.to(device)
+    print(type(x))
+    out = model(x)
+    print(type(out))
     train_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=train_url, download = True)
     test_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=test_url, download = True)
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
@@ -152,7 +158,7 @@ def main(experiment,learning_rate=5e-4, batch_size=20, epochs=2,
                                 collate_fn=lambda x: data_processing(x, 'valid'),
                                 **kwargs)
 
-    model = DCRN(standard_enc,standard_dec).to(device)
+    
     
     print(next(iter(train_loader))[0][0][0].shape)
     #print(plot_spectrogram(next(iter(train_loader))[0][0][0]))

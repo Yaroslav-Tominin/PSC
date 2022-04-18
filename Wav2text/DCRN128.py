@@ -4,8 +4,6 @@ Created on Sun Apr 17 22:13:27 2022
 
 @author: antoi
 """
-
-#TEST MODEL
 import torch as t
 import torch.nn as nn
 
@@ -15,7 +13,6 @@ class EConv(nn.Module):
                  input_channels, 
                  output_channels,
                  fbins, 
-                 time_dim = 40,
                  kernel_size = 3,
                  stride=(1,2)):
         super(EConv,self).__init__()
@@ -68,9 +65,7 @@ class doubleBLSTM(nn.Module):
         self.hidden_size = 128
         self.lstm = nn.LSTM(input_size = 256,  hidden_size = self.hidden_size, num_layers = 2,
                                bidirectional= True, batch_first=True)
-        
-        self.device = t.device('cuda:0' if t.cuda.is_available() else 'cpu')
-       
+    
     def forward(self, batch_data):
         #print(batch_data.shape)
         batch_data = batch_data.squeeze(3).transpose(1,2)
@@ -81,49 +76,36 @@ class doubleBLSTM(nn.Module):
         return output
     
 class DCRN(nn.Module):
+    
     def __init__(self, params_enc, params_dec):
-        
         super(DCRN,self).__init__()
+        
         self.fbins_enc = params_enc["fbins"]
         self.fbins_dec = params_dec["fbins"]
         self.channels_enc = params_enc["channels"]
         self.channels_dec = params_dec["channels"]
-        self.device = t.device('cuda:0' if t.cuda.is_available() else 'cpu')
+        
         #ENCODER
         self.encoder = []
         
         #SKIPPING DENSE BLOCKS FIRST
-        
         for i in range(1,len(self.fbins_enc)):
             self.cell = EConv(self.channels_enc[i-1], self.channels_enc[i], fbins = self.fbins_enc[i])
             #self.dense = E_Dense_Block(self.output_channels,self.output_channels)
-            self.encoder.append(nn.Sequential(self.cell))
-            
-        #Additional layer with doubling output_channels number
-    
+            self.encoder.append(nn.Sequential(self.cell))  
         #self.dense = E_Dense_Block(self.output_channels,self.output_channels)
         #Layers without dense blocks
-            
         #2 BILSTM
         self.lstm = doubleBLSTM()
-       
         #DECODER
         self.decoder = []
-        #1 concatenation
         
         #2 Layers without dense block
         for i in range(1,len(self.fbins_dec)):
             self.cell = DConv(self.channels_dec[i-1], self.channels_dec[i],fbins = self.fbins_dec[i])
             self.decoder.append(nn.Sequential(self.cell))
-            
         #SKIPPING DENSE BLOCKS
-    
         #self.dense = E_Dense_Block(self.output_channels,self.output_channels)
-            
-
-            
-        #1 last conv, no concatenation, 1 output channels, 256 fbins output
-        self.lastcell = nn.Sequential(DConv(32, 1,256))
         
     def forward(self,batch_data):
         y = batch_data
@@ -143,11 +125,7 @@ class DCRN(nn.Module):
             y = t.cat((y,e_con), 3)
             y = x(y)
             #print(y.shape)
-        """
-        e_con = saved.pop()
-        y = t.cat((y,e_con), 3)
-        y = self.lastcell(y) 
-        """
+     
         return y
     
 standard_enc = {"fbins" : [128,64,32,16,8,4,2,1], "channels" : [1,32,32,32,32,64,128,256,512]}
