@@ -31,10 +31,10 @@ class Add_noise(nn.Module):
 
 noise_audio_transforms = nn.Sequential(
     Add_noise(),
-    torchaudio.transforms.Spectrogram(normalized = True, n_fft=128),
+    torchaudio.transforms.Spectrogram(normalized = True, n_fft=255),
 )
 clean_audio_transforms = nn.Sequential(
-    torchaudio.transforms.Spectrogram(normalized = True,n_fft=128),
+    torchaudio.transforms.Spectrogram(normalized = True, n_fft=255),
 )
 
 def data_processing(data, data_type="train"):
@@ -44,7 +44,6 @@ def data_processing(data, data_type="train"):
     for (waveform, _, utterance, _, _, _) in data:
         spec_noise = noise_audio_transforms(waveform).squeeze(0).transpose(0, 1)
         spec_clean = clean_audio_transforms(waveform).squeeze(0).transpose(0,1)
-        
         specs_noise.append(spec_noise)
         specs_clean.append(spec_clean)
         
@@ -75,7 +74,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
         for batch_idx, _data in enumerate(train_loader):
             specs_noise, specs_clean = _data 
             specs_noise, specs_clean = specs_noise.to(device), specs_clean.to(device)
-    
+            
             optimizer.zero_grad()
     
             output = model(specs_noise)  # (batch, time, n_class)
