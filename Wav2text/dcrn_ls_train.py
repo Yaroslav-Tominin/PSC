@@ -119,7 +119,7 @@ def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
   
     print('Test set: Average loss: {:.4f}\n'.format(test_loss))
 
-def main(experiment,learning_rate=5e-4, batch_size=20, epochs=20,
+def main(experiment,learning_rate=5e-5, batch_size=20, epochs=20,
     train_url="train-clean-100", test_url="test-clean"):
     
     hparams = {
