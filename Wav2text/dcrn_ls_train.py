@@ -21,7 +21,7 @@ class Add_noise(nn.Module):
         super(Add_noise,self).__init__()
     def __call__(self, sample):
         signal = sample[0].squeeze(0)
-        db = np.random.choice([0,-5,5])
+        db = np.random.choice([-5,5])
         mq_s = np.sqrt(torch.mean(signal**2))
         mq_b = np.sqrt(mq_s**2/10**(db/10))
         noise = torch.from_numpy(np.random.normal(0,mq_b,len(signal)))
@@ -31,10 +31,10 @@ class Add_noise(nn.Module):
 
 noise_audio_transforms = nn.Sequential(
     Add_noise(),
-    torchaudio.transforms.MelSpectrogram(sample_rate=16000, n_mels=128),
+    torchaudio.transforms.Spectrogram(normalized = True, n_fft=128),
 )
 clean_audio_transforms = nn.Sequential(
-    torchaudio.transforms.MelSpectrogram(sample_rate=16000, n_mels=128),
+    torchaudio.transforms.Spectrogram(normalized = True,n_fft=128),
 )
 
 def data_processing(data, data_type="train"):
