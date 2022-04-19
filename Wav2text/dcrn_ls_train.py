@@ -110,7 +110,7 @@ def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
               
                loss = criterion(output, specs_clean)
                test_loss += loss.item() / len(test_loader)
-                
+               
                
 
    
@@ -137,6 +137,8 @@ def main(experiment,learning_rate=5e-5, batch_size=20, epochs=1,
         os.makedirs("./data")
     model = DCRN(standard_enc,standard_dec)
     model.to(device)
+    
+    print("saved")
     """
     x = torch.randn((16,1,40,128)).to(device)
     print(type(x))
@@ -176,7 +178,7 @@ def main(experiment,learning_rate=5e-5, batch_size=20, epochs=1,
     for epoch in range(1, epochs + 1):
         train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment)
         test(model, device, test_loader, criterion, epoch, iter_meter, experiment)
-    torch.save(model, "dcrn.pt")
+    torch.save(model.state_dict(), "dcrn.pt")
     
 if __name__ == "__main__":
     print("starting script")
