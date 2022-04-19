@@ -119,7 +119,7 @@ def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
   
     print('Test set: Average loss: {:.4f}\n'.format(test_loss))
 
-def main(experiment,learning_rate=5e-4, batch_size=20, epochs=2,
+def main(experiment,learning_rate=5e-4, batch_size=20, epochs=20,
     train_url="train-clean-100", test_url="test-clean"):
     
     hparams = {
@@ -138,10 +138,12 @@ def main(experiment,learning_rate=5e-4, batch_size=20, epochs=2,
         os.makedirs("./data")
     model = DCRN(standard_enc,standard_dec)
     model.to(device)
+    """
     x = torch.randn((16,1,40,128)).to(device)
     print(type(x))
     out = model(x)
     print(type(out))
+    """
     train_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=train_url, download = True)
     test_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=test_url, download = True)
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
@@ -175,7 +177,7 @@ def main(experiment,learning_rate=5e-4, batch_size=20, epochs=2,
     for epoch in range(1, epochs + 1):
         train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment)
         test(model, device, test_loader, criterion, epoch, iter_meter, experiment)
-    #torch_saver(model)
+    torch.save(model, "dcrn.pt")
     
 if __name__ == "__main__":
     print("starting script")
