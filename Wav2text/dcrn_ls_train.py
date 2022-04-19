@@ -31,10 +31,10 @@ class Add_noise(nn.Module):
 
 noise_audio_transforms = nn.Sequential(
     Add_noise(),
-    torchaudio.transforms.MelSpectrogram(normalized = True, n_fft=255),
+    torchaudio.transforms.MelSpectrogram(normalized = True, n_fft=255, power = 0.5),
 )
 clean_audio_transforms = nn.Sequential(
-    torchaudio.transforms.MelSpectrogram(normalized = True, n_fft=255),
+    torchaudio.transforms.MelSpectrogram(normalized = True, n_fft=255, power = 0.5),
 )
 """
 import librosa
