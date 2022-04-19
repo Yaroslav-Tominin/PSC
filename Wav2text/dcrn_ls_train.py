@@ -31,12 +31,26 @@ class Add_noise(nn.Module):
 
 noise_audio_transforms = nn.Sequential(
     Add_noise(),
-    torchaudio.transforms.Spectrogram(normalized = True, n_fft=255),
+    torchaudio.transforms.MelSpectrogram(normalized = True, n_fft=255),
 )
 clean_audio_transforms = nn.Sequential(
-    torchaudio.transforms.Spectrogram(normalized = True, n_fft=255),
+    torchaudio.transforms.MelSpectrogram(normalized = True, n_fft=255),
 )
+"""
+import librosa
+from matplotlib import pyplot as plt
 
+def plot_spectrogram(spec, title=None, ylabel='freq_bin', aspect='auto', xmax=None):
+  fig, axs = plt.subplots(1, 1)
+  axs.set_title(title or 'Spectrogram (db)')
+  axs.set_ylabel(ylabel)
+  axs.set_xlabel('frame')
+  im = axs.imshow(librosa.power_to_db(spec), origin='lower', aspect=aspect)
+  if xmax:
+    axs.set_xlim((0, xmax))
+  fig.colorbar(im, ax=axs)
+  plt.show(block=False)
+"""  
 def data_processing(data, data_type="train"):
     specs_noise = []
     specs_clean = []
@@ -44,6 +58,8 @@ def data_processing(data, data_type="train"):
     for (waveform, _, utterance, _, _, _) in data:
         spec_noise = noise_audio_transforms(waveform).squeeze(0).transpose(0, 1)
         spec_clean = clean_audio_transforms(waveform).squeeze(0).transpose(0,1)
+        #plot_spectrogram(spec_noise)
+        #plot_spectrogram(spec_clean)
         specs_noise.append(spec_noise)
         specs_clean.append(spec_clean)
         
@@ -138,7 +154,7 @@ def main(experiment,learning_rate=5e-5, batch_size=20, epochs=1,
     model = DCRN(standard_enc,standard_dec)
     model.to(device)
     
-    print("saved")
+    #print("saved")
     """
     x = torch.randn((16,1,40,128)).to(device)
     print(type(x))
@@ -161,7 +177,7 @@ def main(experiment,learning_rate=5e-5, batch_size=20, epochs=1,
 
     
     
-    print(next(iter(train_loader))[0][0][0].shape)
+    #print(next(iter(train_loader))[0][0][0].shape)
     #print(plot_spectrogram(next(iter(train_loader))[0][0][0]))
     #print(model)
     print('Num Model Parameters', sum([param.nelement() for param in model.parameters()]))
