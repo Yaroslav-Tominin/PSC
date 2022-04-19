@@ -84,7 +84,8 @@ class DCRN(nn.Module):
         self.fbins_dec = params_dec["fbins"]
         self.channels_enc = params_enc["channels"]
         self.channels_dec = params_dec["channels"]
-        
+        use_cuda = t.cuda.is_available()
+        self.device = t.device("cuda" if use_cuda else "cpu")
         #ENCODER
         self.encoder = []
         
@@ -108,10 +109,12 @@ class DCRN(nn.Module):
         #self.dense = E_Dense_Block(self.output_channels,self.output_channels)
         
     def forward(self,batch_data):
-        y = batch_data
+        y = batch_data.to(self.device)
+        
         saved = []
         ln = 0
         for x in self.encoder:
+            x.to(self.device)
             y = x(y)
             #print(y.shape)
             saved.append(y)
@@ -120,6 +123,7 @@ class DCRN(nn.Module):
         y = self.lstm(y)
         #print("decoder")
         for x in self.decoder:
+            x.to(self.device)
             e_con = saved.pop()
             ln+=1
             y = t.cat((y,e_con), 3)
