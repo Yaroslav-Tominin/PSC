@@ -15,7 +15,7 @@ class STFT(t.nn.Module):
         #print(sample.shape)
         elems = []
         for x in sample:
-            spec = t.stft(x.squeeze(0), n_fft = 255)
+            spec = t.stft(x.squeeze(0), n_fft = 255, hop_length = 1, normalized = True)
             elems.append(spec[None,:])
         res = elems[0]
         for i in range(1,len(elems)):
@@ -28,7 +28,7 @@ class ISTFT(t.nn.Module):
         #print(sample.shape)
         elems = []
         for x in sample:
-            spec = t.istft(x.squeeze(0), n_fft = 255)
+            spec = t.istft(x.squeeze(0), n_fft = 255, hop_length = 1, normalized = True)
             elems.append(spec[None,:])
         res = elems[0]
         for i in range(1,len(elems)):

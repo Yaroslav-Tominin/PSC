@@ -36,7 +36,7 @@ class STFT(torch.nn.Module):
         print(sample.shape)
         elems = []
         for x in sample:
-            spec = torch.stft(x.squeeze(0), n_fft = 255)
+            spec = torch.stft(x.squeeze(0), n_fft = 255, hop_length = 1, normalized = True)
             elems.append(spec[None,:])
         res = elems[0]
         for i in range(1,len(elems)):
@@ -49,7 +49,7 @@ class ISTFT(torch.nn.Module):
         print(sample.shape)
         elems = []
         for x in sample:
-            spec = torch.istft(x.squeeze(0), n_fft = 255)
+            spec = torch.istft(x.squeeze(0), n_fft = 255, hop_length = 1, normalized =True)
             elems.append(spec[None,:])
         res = elems[0]
         for i in range(1,len(elems)):
