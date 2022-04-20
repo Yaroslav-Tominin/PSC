@@ -36,7 +36,8 @@ class STFT(torch.nn.Module):
         #print(sample.shape)
         elems = []
         for x in sample:
-            spec = torch.stft(x.squeeze(0), n_fft = 255, normalized = True)
+            spec = torch.stft(x, n_fft = 255, normalized = True).transpose(0,2)
+            
             elems.append(spec[None,:])
         res = elems[0]
         for i in range(1,len(elems)):
@@ -57,10 +58,11 @@ class ISTFT(torch.nn.Module):
         return res
 noise_audio_transforms = nn.Sequential(
     Add_noise(),
+    STFT()
 
 )
 clean_audio_transforms = nn.Sequential(
-   
+   STFT()
 )
 """
 import librosa
@@ -78,21 +80,41 @@ def plot_spectrogram(spec, title=None, ylabel='freq_bin', aspect='auto', xmax=No
   plt.show(block=False)
 """  
 def data_processing(data, data_type="train"):
+    waves_noise_r = []
+    waves_clean_r = []
+    waves_noise_c = []
+    waves_clean_c = []
+    
     waves_noise = []
     waves_clean = []
-    
     for (waveform, _, utterance, _, _, _) in data:
         wave_noise = noise_audio_transforms(waveform).squeeze(0)
         wave_clean = clean_audio_transforms(waveform).squeeze(0)
+        #print(wave_noise.shape)
         #plot_spectrogram(spec_noise)
         #plot_spectrogram(spec_clean)
-        waves_noise.append(wave_noise)
-        waves_clean.append(wave_clean)
+        waves_noise_r.append(wave_noise[0])
+        waves_clean_r.append(wave_clean[0])
+        waves_noise_c.append(wave_noise[1])
+        waves_clean_c.append(wave_clean[1])
         
-    waves_noise = nn.utils.rnn.pad_sequence(waves_noise, batch_first=True).unsqueeze(1)
-    waves_clean = nn.utils.rnn.pad_sequence(waves_clean, batch_first=True).unsqueeze(1)
+    waves_noise_r = nn.utils.rnn.pad_sequence(waves_noise_r, batch_first=True).unsqueeze(1)
+    waves_clean_r = nn.utils.rnn.pad_sequence(waves_clean_r, batch_first=True).unsqueeze(1)
+    waves_noise_c = nn.utils.rnn.pad_sequence(waves_noise_c, batch_first=True).unsqueeze(1)
+    waves_clean_c = nn.utils.rnn.pad_sequence(waves_clean_c, batch_first=True).unsqueeze(1)
    
+    for i in range(len(waves_noise_r)):
+        w_n = torch.cat([waves_noise_r[i],waves_noise_c[i]],0)
+        waves_noise.append(w_n)
+        w_c = torch.cat([waves_clean_r[i],waves_clean_c[i]],0)
+        waves_clean.append(w_c)
+        
+    waves_noise = torch.stack(waves_noise)
+    waves_clean = torch.stack(waves_clean)
+    #print(waves_noise.shape)
     return waves_noise, waves_clean
+   
+   
 
 
 class IterMeter(object):
@@ -121,10 +143,6 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             optimizer.zero_grad()
     
             output = model(specs_noise)  # (batch, time, n_class)
-            
-            gap = - output.shape[1]-specs_clean.shape[1]
-            
-            specs_clean = torch.cat((specs_clean,torch.zeros((specs_clean.shape[0],gap))),1)
             loss = criterion(output, specs_clean)
             loss.backward()
     
@@ -185,12 +203,12 @@ def main(experiment,learning_rate=5e-3, batch_size=4, epochs=1,
     model.to(device)
     
     #print("saved")
-    """
-    x = torch.randn((16,1,40,128)).to(device)
+    
+    x = torch.randn((16,2,40,128)).to(device)
     print(type(x))
     out = model(x)
     print(type(out))
-    """
+    
     train_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=train_url, download = True)
     test_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=test_url, download = True)
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
