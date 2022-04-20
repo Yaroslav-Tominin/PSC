@@ -140,7 +140,7 @@ class DCRN(nn.Module):
         
     def forward(self,batch_data):
         y = batch_data.to(self.device)
-        y = self.stft(y).transpose(1,3)
+        #y = self.stft(y).transpose(1,3)
         #print(y.shape)
         #y = F.spectrogram(y, pad = 0, window = None, n_fft = 256, hop_length = 1, win_length = None, normalized = True, power = None)
         
@@ -163,7 +163,7 @@ class DCRN(nn.Module):
             y = x(y)
             #print(y.shape)
         #y = t.istft(y, 256, hop_length = 1)
-        y = self.istft(y.transpose(1,3))
+        #y = self.istft(y.transpose(1,3))
         return y
     
 standard_enc = {"fbins" : [128,64,32,16,8,4,2,1], "channels" : [2,32,32,32,32,64,128,256,512]}
