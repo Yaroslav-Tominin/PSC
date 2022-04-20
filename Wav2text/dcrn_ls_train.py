@@ -29,12 +29,38 @@ class Add_noise(nn.Module):
         sn = signal + noise
         return sn[None,:].float()
 
+class STFT(torch.nn.Module):
+    def __init__(self):
+        super(STFT,self).__init__()
+    def __call__(self, sample):
+        print(sample.shape)
+        elems = []
+        for x in sample:
+            spec = torch.stft(x.squeeze(0), n_fft = 255)
+            elems.append(spec[None,:])
+        res = elems[0]
+        for i in range(1,len(elems)):
+            res = torch.cat((res,elems[i]),0)
+        return res
+class ISTFT(torch.nn.Module):
+    def __init__(self):
+        super(ISTFT,self).__init__()
+    def __call__(self, sample):
+        print(sample.shape)
+        elems = []
+        for x in sample:
+            spec = torch.istft(x.squeeze(0), n_fft = 255)
+            elems.append(spec[None,:])
+        res = elems[0]
+        for i in range(1,len(elems)):
+            res = torch.cat((res,elems[i]),0)
+        return res
 noise_audio_transforms = nn.Sequential(
     Add_noise(),
-    torchaudio.transforms.MelSpectrogram(normalized = True, n_fft=255, power = 0.5),
+
 )
 clean_audio_transforms = nn.Sequential(
-    torchaudio.transforms.MelSpectrogram(normalized = True, n_fft=255, power = 0.5),
+   
 )
 """
 import librosa
@@ -52,21 +78,23 @@ def plot_spectrogram(spec, title=None, ylabel='freq_bin', aspect='auto', xmax=No
   plt.show(block=False)
 """  
 def data_processing(data, data_type="train"):
-    specs_noise = []
-    specs_clean = []
+    waves_noise = []
+    waves_clean = []
     
     for (waveform, _, utterance, _, _, _) in data:
-        spec_noise = noise_audio_transforms(waveform).squeeze(0).transpose(0, 1)
-        spec_clean = clean_audio_transforms(waveform).squeeze(0).transpose(0,1)
+        wave_noise = noise_audio_transforms(waveform).squeeze(0)
+        wave_clean = clean_audio_transforms(waveform).squeeze(0)
         #plot_spectrogram(spec_noise)
         #plot_spectrogram(spec_clean)
-        specs_noise.append(spec_noise)
-        specs_clean.append(spec_clean)
+        waves_noise.append(wave_noise)
+        waves_clean.append(wave_clean)
+        print(wave_noise.shape)
         
-    specs_noise = nn.utils.rnn.pad_sequence(specs_noise, batch_first=True).unsqueeze(1)
-    specs_clean = nn.utils.rnn.pad_sequence(specs_clean, batch_first=True).unsqueeze(1)
+    waves_noise = nn.utils.rnn.pad_sequence(waves_noise, batch_first=True).unsqueeze(1)
+    waves_clean = nn.utils.rnn.pad_sequence(waves_clean, batch_first=True).unsqueeze(1)
    
-    return specs_noise, specs_clean
+    return waves_noise, waves_clean
+
 
 class IterMeter(object):
     """keeps track of total iterations"""
@@ -134,7 +162,7 @@ def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
   
     print('Test set: Average loss: {:.4f}\n'.format(test_loss))
 
-def main(experiment,learning_rate=5e-5, batch_size=20, epochs=1,
+def main(experiment,learning_rate=5e-3, batch_size=20, epochs=1,
     train_url="train-clean-100", test_url="test-clean"):
     
     hparams = {
@@ -142,8 +170,9 @@ def main(experiment,learning_rate=5e-5, batch_size=20, epochs=1,
         "batch_size": batch_size,
         "epochs": epochs
     }
-    standard_enc = {"fbins" : [128,64,32,16,8,4,2,1], "channels" : [1,32,32,32,32,64,128,256,512]}
-    standard_dec = {"fbins" : [1,4,8,16,32,64,128,256], "channels" : [256,128,64,32,32,32,32,1]}
+    standard_enc = {"fbins" : [128,64,32,16,8,4,2,1], "channels" : [2,32,32,32,32,64,128,256,512]}
+    standard_dec = {"fbins" : [2,4,8,16,32,64,128,256], "channels" : [256,128,64,32,32,32,32,2]}
+        
 
     experiment.log_parameters(hparams)
     use_cuda = torch.cuda.is_available()
