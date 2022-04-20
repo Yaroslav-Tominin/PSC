@@ -88,7 +88,6 @@ def data_processing(data, data_type="train"):
         #plot_spectrogram(spec_clean)
         waves_noise.append(wave_noise)
         waves_clean.append(wave_clean)
-        print(wave_noise.shape)
         
     waves_noise = nn.utils.rnn.pad_sequence(waves_noise, batch_first=True).unsqueeze(1)
     waves_clean = nn.utils.rnn.pad_sequence(waves_clean, batch_first=True).unsqueeze(1)
