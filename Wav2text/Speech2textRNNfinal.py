@@ -266,7 +266,6 @@ class TextTransform:
 
 # torchaudio.transforms.MelSpectrogram(sample_rate=16000, n_mels=128),
 train_audio_transforms = nn.Sequential(
-    
     torchaudio.transforms.MelSpectrogram(sample_rate=16000, n_mels=128),
     torchaudio.transforms.FrequencyMasking(freq_mask_param=15),
     torchaudio.transforms.TimeMasking(time_mask_param=35)
@@ -509,7 +508,7 @@ def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
 
     print('Test set: Average loss: {:.4f}, Average CER: {:4f} Average WER: {:.4f}\n'.format(test_loss, avg_cer, avg_wer))
 
-def main(experiment,learning_rate=5e-4, batch_size=20, epochs=10,
+def main(experiment,learning_rate=5e-4, batch_size=20, epochs=20,
     train_url="train-clean-100", test_url="test-clean"):
     
     hparams = {
@@ -552,7 +551,7 @@ def main(experiment,learning_rate=5e-4, batch_size=20, epochs=10,
         hparams['n_class'], hparams['n_feats'], hparams['stride'], hparams['dropout']
         ).to(device)
     
-    #print(next(iter(train_loader))[3])
+    print(next(iter(train_loader))[0][0][0].shape)
     #print(plot_spectrogram(next(iter(train_loader))[0][0][0]))
     #print(model)
     print('Num Model Parameters', sum([param.nelement() for param in model.parameters()]))
