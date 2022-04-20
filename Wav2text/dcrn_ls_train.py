@@ -33,7 +33,7 @@ class STFT(torch.nn.Module):
     def __init__(self):
         super(STFT,self).__init__()
     def __call__(self, sample):
-        print(sample.shape)
+        #print(sample.shape)
         elems = []
         for x in sample:
             spec = torch.stft(x.squeeze(0), n_fft = 255, hop_length = 1, normalized = True)
@@ -46,7 +46,7 @@ class ISTFT(torch.nn.Module):
     def __init__(self):
         super(ISTFT,self).__init__()
     def __call__(self, sample):
-        print(sample.shape)
+        #print(sample.shape)
         elems = []
         for x in sample:
             spec = torch.istft(x.squeeze(0), n_fft = 255, hop_length = 1, normalized =True)
