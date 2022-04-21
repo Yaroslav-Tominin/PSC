@@ -163,6 +163,7 @@ def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
     print('\nevaluating…')
     model.eval()
     test_loss = 0
+    first_test = True
     with experiment.test():
         with torch.no_grad():
             for I, _data in enumerate(test_loader):
@@ -172,6 +173,13 @@ def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
                output = model(specs_noise)  # (batch, time, n_class)
               
                loss = criterion(output, specs_clean)
+               if first_test:
+                   print(loss)
+                   out = output.transpose(1,3)
+                   istft = ISTFT()
+                   out = istft(out)
+                   torchaudio.save("res.wav",out[0])
+                   first_test = False
                test_loss += loss.item() / len(test_loader)
                
                
@@ -232,10 +240,7 @@ def main(experiment,learning_rate=5e-2, batch_size=12, epochs=1,
 
     optimizer = optim.AdamW(model.parameters(), hparams['learning_rate'])
     criterion = nn.MSELoss()
-    scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=hparams['learning_rate'], 
-                                            steps_per_epoch=int(len(train_loader)),
-                                            epochs=hparams['epochs'],
-                                            anneal_strategy='linear')
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size = int(len(train_loader)))
 
     iter_meter = IterMeter()
     

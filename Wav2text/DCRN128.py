@@ -153,7 +153,7 @@ class DCRN(nn.Module):
             saved.append(y)
             
         #print("lstm")   
-        y = self.lstm(y)
+        #y = self.lstm(y)
         #print("decoder")
         for x in self.decoder:
             x.to(self.device)
@@ -172,7 +172,7 @@ standard_dec = {"fbins" : [2,4,8,16,32,64,128,256], "channels" : [256,128,64,32,
 
 def test():
     model = DCRN(standard_enc, standard_dec)
-    x = t.randn((16,4000))
+    x = t.randn((16,2,40,128))
     #params = model.parameters()
     #print(type(model(x)))
     #model.cuda()
