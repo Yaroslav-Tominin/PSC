@@ -126,10 +126,16 @@ class IterMeter(object):
 
     def get(self):
         return self.val
+def custom_loss(pred,target):
+    """computes L1 loss separating real and imaginary parts"""
+    l1_loss = torch.nn.L1Loss()
+    real_p,real_t = pred[:,0,:,:],target[:,0,:,:]
+    comp_p,comp_t = pred[:,1,:,:],target[:,1,:,:]
+    loss = l1_loss(real_p,real_t)+l1_loss(comp_p,comp_t)
+    return loss
 
 
-
-def test(model, device, test_loader, criterion, iter_meter, experiment):
+def test(model, device, test_loader, iter_meter, experiment):
     print('\nevaluating…')
     model.eval()
     test_loss = 0
@@ -142,15 +148,17 @@ def test(model, device, test_loader, criterion, iter_meter, experiment):
     
                output = model(specs_noise)  # (batch, time, n_class)
               
-               loss = criterion(output, specs_clean)
+               loss = custom_loss(output, specs_clean)
                if first_test:
                    print(loss)
                    out = output.transpose(1,3)
-                   
+                   orig = specs_noise.transpose(1,3)
                    istft = ISTFT()
                    out = istft(out)
+                   orig = istft(orig)
                    print(out.shape)
                    torchaudio.save("new_res.wav",out.to("cpu")[0][None,:],16000)
+                   torchaudio.save("new_orig.wav",orig.to("cpu")[0][None,:],16000)
                    first_test = False
                test_loss += loss.item() / len(test_loader)
                
@@ -194,7 +202,7 @@ def main(audio_path = None, use_experiment = False,batch_size=12,
                                     **kwargs)
         criterion = nn.MSELoss()
         iter_meter = IterMeter()
-        test(model, device, test_loader, criterion, iter_meter, experiment)
+        test(model, device, test_loader, iter_meter, experiment)
    
 if __name__ == "__main__":
     main(use_experiment = True)
