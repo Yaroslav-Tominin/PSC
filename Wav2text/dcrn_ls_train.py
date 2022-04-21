@@ -128,8 +128,15 @@ class IterMeter(object):
     def get(self):
         return self.val
 
+def custom_loss(pred,target):
+    """computes L1 loss separating real and imaginary parts"""
+    l1_loss = torch.nn.L1Loss()
+    real_p,real_t = pred[:,0,:,:],target[:,0,:,:]
+    comp_p,comp_t = pred[:,1,:,:],target[:,1,:,:]
+    loss = l1_loss(real_p,real_t)+l1_loss(comp_p,comp_t)
+    return loss
 
-def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment):
+def train(model, device, train_loader, optimizer, scheduler, epoch, iter_meter, experiment):
     model.train()
     print("starting training")
     data_len = len(train_loader.dataset)
@@ -143,7 +150,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             optimizer.zero_grad()
     
             output = model(specs_noise)  # (batch, time, n_class)
-            loss = criterion(output, specs_clean)
+            loss = custom_loss(output, specs_clean)
             loss.backward()
     
             experiment.log_metric('loss', loss.item(), step=iter_meter.get())
@@ -159,7 +166,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
                     100. * batch_idx / len(train_loader), loss.item()))
     
     
-def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
+def test(model, device, test_loader, epoch, iter_meter, experiment):
     print('\nevaluating…')
     model.eval()
     test_loss = 0
@@ -172,7 +179,7 @@ def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
     
                output = model(specs_noise)  # (batch, time, n_class)
               
-               loss = criterion(output, specs_clean)
+               loss = custom_loss(output, specs_clean)
                if first_test:
                    print(loss)
                    out = output.transpose(1,3)
@@ -189,7 +196,7 @@ def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
   
     print('Test set: Average loss: {:.4f}\n'.format(test_loss))
 
-def main(experiment,learning_rate=5e-2, batch_size=12, epochs=1,
+def main(experiment,learning_rate=5e-4, batch_size=12, epochs=2,
     train_url="train-clean-100", test_url="test-clean"):
     
     hparams = {
@@ -239,14 +246,14 @@ def main(experiment,learning_rate=5e-2, batch_size=12, epochs=1,
     print('Num Model Parameters', sum([param.nelement() for param in model.parameters()]))
 
     optimizer = optim.AdamW(model.parameters(), hparams['learning_rate'])
-    criterion = nn.MSELoss()
+    
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size = int(len(train_loader)))
 
     iter_meter = IterMeter()
     
     for epoch in range(1, epochs + 1):
-        train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment)
-        test(model, device, test_loader, criterion, epoch, iter_meter, experiment)
+        train(model, device, train_loader, optimizer, scheduler, epoch, iter_meter, experiment)
+        test(model, device, test_loader, epoch, iter_meter, experiment)
     torch.save(model.state_dict(), "dcrn.pt")
     
 if __name__ == "__main__":

@@ -169,6 +169,13 @@ class DCRN(nn.Module):
 standard_enc = {"fbins" : [128,64,32,16,8,4,2,1], "channels" : [2,32,32,32,32,64,128,256,512]}
 standard_dec = {"fbins" : [2,4,8,16,32,64,128,256], "channels" : [256,128,64,32,32,32,32,2]}
     
+def custom_loss(pred,target):
+    """computes L1 loss separating real and imaginary parts"""
+    l1_loss = t.nn.L1Loss()
+    real_p,real_t = pred[:,0,:,:],target[:,0,:,:]
+    comp_p,comp_t = pred[:,1,:,:],target[:,1,:,:]
+    loss = l1_loss(real_p,real_t)+l1_loss(comp_p,comp_t)
+    return loss
 
 def test():
     model = DCRN(standard_enc, standard_dec)
@@ -179,7 +186,7 @@ def test():
     #x = x.cuda()
     #print(type(model(x)))
     out = model.forward(x)
-    
+    print(custom_loss(x,out))
     print(type(out))
     print(out.shape)
     
