@@ -21,7 +21,7 @@ class Add_noise(nn.Module):
         super(Add_noise,self).__init__()
     def __call__(self, sample):
         signal = sample[0].squeeze(0)
-        db = np.random.choice([-5])
+        db = np.random.choice([15])
         mq_s = np.sqrt(torch.mean(signal**2))
         mq_b = np.sqrt(mq_s**2/10**(db/10))
         noise = torch.from_numpy(np.random.normal(0,mq_b,len(signal)))
@@ -78,7 +78,7 @@ def plot_spectrogram(spec, title=None, ylabel='freq_bin', aspect='auto', xmax=No
     axs.set_xlim((0, xmax))
   fig.colorbar(im, ax=axs)
   plt.show(block=False)
-"""  
+"""
 def data_processing(data, data_type="train"):
     waves_noise_r = []
     waves_clean_r = []
@@ -90,8 +90,7 @@ def data_processing(data, data_type="train"):
     for (waveform, _, utterance, _, _, _) in data:
         wave_noise = noise_audio_transforms(waveform).squeeze(0)
         wave_clean = clean_audio_transforms(waveform).squeeze(0)
-        #print(wave_noise.shape)
-        #plot_spectrogram(spec_noise)
+        
         #plot_spectrogram(spec_clean)
         waves_noise_r.append(wave_noise[0])
         waves_clean_r.append(wave_clean[0])
