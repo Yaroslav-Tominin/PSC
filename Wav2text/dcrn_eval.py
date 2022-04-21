@@ -20,7 +20,7 @@ class Add_noise(nn.Module):
         super(Add_noise,self).__init__()
     def __call__(self, sample):
         signal = sample[0].squeeze(0)
-        db = np.random.choice([-5,5])
+        db = np.random.choice([15])
         mq_s = np.sqrt(torch.mean(signal**2))
         mq_b = np.sqrt(mq_s**2/10**(db/10))
         noise = torch.from_numpy(np.random.normal(0,mq_b,len(signal)))
