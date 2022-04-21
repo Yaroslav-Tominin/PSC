@@ -153,7 +153,7 @@ class DCRN(nn.Module):
             saved.append(y)
             
         #print("lstm")   
-        #y = self.lstm(y)
+        y = self.lstm(y)
         #print("decoder")
         for x in self.decoder:
             x.to(self.device)
