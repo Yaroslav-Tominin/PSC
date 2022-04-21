@@ -150,7 +150,7 @@ def test(model, device, test_loader, criterion, iter_meter, experiment):
                    istft = ISTFT()
                    out = istft(out)
                    print(out.shape)
-                   torchaudio.save("new_res.wav",out.to("cpu")[0],16000)
+                   torchaudio.save("new_res.wav",out.to("cpu")[0][None,:],16000)
                    first_test = False
                test_loss += loss.item() / len(test_loader)
                
