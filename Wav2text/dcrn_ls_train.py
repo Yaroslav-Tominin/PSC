@@ -170,7 +170,7 @@ def test(model, device, test_loader, epoch, iter_meter, experiment):
     print('\nevaluating…')
     model.eval()
     test_loss = 0
-    first_test = True
+    
     with experiment.test():
         with torch.no_grad():
             for I, _data in enumerate(test_loader):
@@ -180,13 +180,7 @@ def test(model, device, test_loader, epoch, iter_meter, experiment):
                output = model(specs_noise)  # (batch, time, n_class)
               
                loss = custom_loss(output, specs_clean)
-               if first_test:
-                   print(loss)
-                   out = output.transpose(1,3)
-                   istft = ISTFT()
-                   out = istft(out)
-                   torchaudio.save("res.wav",out[0])
-                   first_test = False
+               
                test_loss += loss.item() / len(test_loader)
                
                
