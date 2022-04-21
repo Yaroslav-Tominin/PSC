@@ -148,7 +148,7 @@ def test(model, device, test_loader, criterion, iter_meter, experiment):
                    out = output.transpose(1,3)
                    istft = ISTFT()
                    out = istft(out)
-                   torchaudio.save("res.wav",out[0])
+                   torchaudio.save("res.wav",out[0],16000)
                    first_test = False
                test_loss += loss.item() / len(test_loader)
                
@@ -172,7 +172,7 @@ def main(audio_path = None, use_experiment = False,batch_size=12,
         os.makedirs("./data")
     PATH = "dcrnfft.pt"
     model = DCRN(standard_enc,standard_dec)
-    model.load_state_dict(torch.load(PATH, map_location = torch.device('cpu')))
+    model.load_state_dict(torch.load(PATH, map_location = device))
     model.to(device)
     
     
