@@ -620,12 +620,12 @@ def main(experiment,learning_rate=5e-4, batch_size=20, epochs=20,
                                 shuffle=False,
                                 collate_fn=lambda x: data_processing(x, 'valid'),
                                 **kwargs)
-    PATH = "deepspeech.pt"
+    #PATH = "deepspeech.pt"
     model = SpeechRecognitionModel(
         hparams['n_cnn_layers'], hparams['n_rnn_layers'], hparams['rnn_dim'],
         hparams['n_class'], hparams['n_feats'], hparams['stride'], hparams['dropout']
         ).to(device)
-    model.load_state_dict(torch.load(PATH, map_location = device))
+    #model.load_state_dict(torch.load(PATH, map_location = device))
     
     print(next(iter(train_loader))[0][0][0].shape)
     #print(plot_spectrogram(next(iter(train_loader))[0][0][0]))
