@@ -268,7 +268,7 @@ def test(model, device, test_loader, epoch, iter_meter, experiment):
   
     print('Test set: Average loss: {:.4f}\n'.format(test_loss))
 
-def main(experiment,learning_rate=5e-4, batch_size=8, epochs=1,
+def main(experiment,learning_rate=5e-4, batch_size=8, epochs=6,
     train_url="train-clean-100", test_url="test-clean"):
     
     hparams = {
@@ -316,7 +316,7 @@ def main(experiment,learning_rate=5e-4, batch_size=8, epochs=1,
 
     optimizer = optim.AdamW(model.parameters(), hparams['learning_rate'])
     
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size = 500, gamma = 0.4)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size = 2000, gamma = 0.1, last_epoch=6)
 
     iter_meter = IterMeter()
     
