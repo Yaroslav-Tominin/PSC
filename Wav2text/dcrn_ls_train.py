@@ -20,6 +20,7 @@ class Add_noise(nn.Module):
     def __init__(self):
         super(Add_noise,self).__init__()
     def __call__(self, sample):
+        print(sample.shape)
         signal = sample[0].squeeze(0)
         db = np.random.choice([15])
         mq_s = np.sqrt(torch.mean(signal**2))
@@ -28,7 +29,43 @@ class Add_noise(nn.Module):
         #print(noise)
         sn = signal + noise
         return sn[None,:].float()
+    
+def loop_audio(source,length,desired_length):
+    res = source
+    if desired_length>length:
+        iters = desired_length//length
+        remaining = desired_length-length*iters
+        for i in range(1,iters):
+            res = torch.cat((res,source),1)
+        last = source[:, :remaining]
+        res= torch.cat((res,last),1)
+    else:
+        res = source[:,:desired_length]
+    return res
 
+audio_speech = "374-180298-0000.flac"
+def add_real_noise(waveform,snr_db = 10):
+    audio_noise = "Lab41-SRI-VOiCES-rm1-babb-mc01-stu-clo.wav"
+    
+    noise,sr= torchaudio.load(audio_noise)
+    
+    wave_power = waveform.norm(p=2)
+    noise_power = noise.norm(p=2)
+    
+    noise = loop_audio(noise,noise.shape[1],waveform.shape[1])
+   
+    snr = 10 ** (snr_db / 20)
+    scale = snr * noise_power / wave_power
+    return (scale * waveform + noise) / 2
+
+class Add_real_noise(nn.Module):
+    def __init__(self):
+        super(Add_real_noise,self).__init__()
+    def __call__(self, sample):
+        return add_real_noise(sample)
+    
+"""
+OLD Transforms
 class STFT(torch.nn.Module):
     def __init__(self):
         super(STFT,self).__init__()
@@ -56,8 +93,51 @@ class ISTFT(torch.nn.Module):
         for i in range(1,len(elems)):
             res = torch.cat((res,elems[i]),0)
         return res
+"""
+def spectro(x, n_fft=255, hop_length=None, pad=0):
+    *other, length = x.shape
+    x = x.reshape(-1, length)
+    z = torch.stft(x,
+                n_fft * (1 + pad),
+                hop_length or n_fft // 4,
+                window=torch.hann_window(n_fft).to(x),
+                win_length=n_fft,
+                normalized=True,
+                center=True,
+                pad_mode='reflect')#(batch,freqs,frames,channels)
+    
+    return z.transpose(1,3)#(batch,channels,frames,freqs)
+
+
+def ispectro(z, n_fft = 255,hop_length=None, length=None, pad=0):
+    *other, freqs, frames = z.shape
+    #n_fft = 2 * freqs - 2
+    z = z.view(-1, freqs, frames)
+    win_length = n_fft // (1 + pad)
+    x = torch.istft(z,
+                 n_fft,
+                 hop_length,
+                 window=torch.hann_window(win_length).to(z),
+                 win_length=win_length,
+                 normalized=True,
+                 length=length,
+                 center=True)
+    #_, length = x.shape
+    return x[None,:]
+
+class STFT(torch.nn.Module):
+    def __init__(self):
+        super(STFT,self).__init__()
+    def __call__(self, sample):
+        return spectro(sample)
+
+class ISTFT(torch.nn.Module):
+    def __init__(self):
+        super(STFT,self).__init__()
+    def __call__(self, sample):
+        return ispectro(sample)
 noise_audio_transforms = nn.Sequential(
-    Add_noise(),
+    Add_real_noise(),
     STFT()
 
 )
@@ -84,7 +164,7 @@ def data_processing(data, data_type="train"):
     waves_clean_r = []
     waves_noise_c = []
     waves_clean_c = []
-    
+    print("process")
     waves_noise = []
     waves_clean = []
     for (waveform, _, utterance, _, _, _) in data:
@@ -110,7 +190,6 @@ def data_processing(data, data_type="train"):
         
     waves_noise = torch.stack(waves_noise)
     waves_clean = torch.stack(waves_clean)
-    #print(waves_noise.shape)
     return waves_noise, waves_clean
    
    
@@ -212,10 +291,7 @@ def main(experiment,learning_rate=5e-4, batch_size=12, epochs=1,
     
     #print("saved")
     
-    x = torch.randn((16,2,40,128)).to(device)
-    print(type(x))
-    out = model(x)
-    print(type(out))
+   
     
     train_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=train_url, download = True)
     test_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=test_url, download = True)
@@ -246,8 +322,9 @@ def main(experiment,learning_rate=5e-4, batch_size=12, epochs=1,
     
     for epoch in range(1, epochs + 1):
         train(model, device, train_loader, optimizer, scheduler, epoch, iter_meter, experiment)
+        torch.save(model.state_dict(), "dcrn.pt")
         test(model, device, test_loader, epoch, iter_meter, experiment)
-    torch.save(model.state_dict(), "dcrn.pt")
+   
     
 if __name__ == "__main__":
     print("starting script")
