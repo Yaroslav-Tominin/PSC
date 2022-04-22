@@ -584,8 +584,8 @@ def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
 
     print('Test set: Average loss: {:.4f}, Average CER: {:4f} Average WER: {:.4f}\n'.format(test_loss, avg_cer, avg_wer))
 
-def main(experiment,learning_rate=5e-4, batch_size=20, epochs=20,
-    train_url="train-clean-100", test_url="test-clean"):
+def main(experiment,learning_rate=5e-4, batch_size=8, epochs=20,
+    train_url="train-clean-100", test_url="test-other"):
     
     hparams = {
         "n_cnn_layers": 3,
