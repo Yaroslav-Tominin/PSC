@@ -43,8 +43,8 @@ def loop_audio(source,length,desired_length):
         res = source[:,:desired_length]
     return res
 
-audio_speech = "374-180298-0000.flac"
-def add_real_noise(waveform,snr_db = 10):
+
+def add_real_noise(waveform,snr_db = 20):
     audio_noise = "Lab41-SRI-VOiCES-rm1-babb-mc01-stu-clo.wav"
     
     noise,sr= torchaudio.load(audio_noise)
@@ -56,7 +56,7 @@ def add_real_noise(waveform,snr_db = 10):
    
     snr = 10 ** (snr_db / 20)
     scale = snr * noise_power / wave_power
-    return (scale * waveform + noise) / 2
+    return (scale * waveform + noise) / 2*5
 
 class Add_real_noise(nn.Module):
     def __init__(self):
@@ -94,7 +94,7 @@ class ISTFT(torch.nn.Module):
             res = torch.cat((res,elems[i]),0)
         return res
 """
-def spectro(x, n_fft=255, hop_length=None, pad=0):
+def spectro(x, n_fft=511, hop_length=None, pad=0):
     *other, length = x.shape
     x = x.reshape(-1, length)
     z = torch.stft(x,
@@ -109,7 +109,7 @@ def spectro(x, n_fft=255, hop_length=None, pad=0):
     return z.transpose(1,3)#(batch,channels,frames,freqs)
 
 
-def ispectro(z, n_fft = 255,hop_length=None, length=None, pad=0):
+def ispectro(z, n_fft = 511,hop_length=None, length=None, pad=0):
     *other, freqs, frames = z.shape
     #n_fft = 2 * freqs - 2
     z = z.view(-1, freqs, frames)
@@ -268,7 +268,7 @@ def test(model, device, test_loader, epoch, iter_meter, experiment):
   
     print('Test set: Average loss: {:.4f}\n'.format(test_loss))
 
-def main(experiment,learning_rate=5e-4, batch_size=12, epochs=1,
+def main(experiment,learning_rate=5e-4, batch_size=8, epochs=1,
     train_url="train-clean-100", test_url="test-clean"):
     
     hparams = {
@@ -276,8 +276,8 @@ def main(experiment,learning_rate=5e-4, batch_size=12, epochs=1,
         "batch_size": batch_size,
         "epochs": epochs
     }
-    standard_enc = {"fbins" : [128,64,32,16,8,4,2,1], "channels" : [2,32,32,32,32,64,128,256,512]}
-    standard_dec = {"fbins" : [2,4,8,16,32,64,128,256], "channels" : [256,128,64,32,32,32,32,2]}
+    #standard_enc = {"fbins" : [256,128,64,32,16,8,4,2,1], "channels" : [2,32,32,32,32,64,128,256,512]}
+    #standard_dec = {"fbins" : [2,4,8,16,32,64,128,256,256], "channels" : [256,128,64,32,32,32,32,2]}
         
 
     experiment.log_parameters(hparams)
@@ -286,7 +286,7 @@ def main(experiment,learning_rate=5e-4, batch_size=12, epochs=1,
 
     if not os.path.isdir("./data"):
         os.makedirs("./data")
-    model = DCRN(standard_enc,standard_dec)
+    model = DCRN()
     model.to(device)
     
     #print("saved")
@@ -316,7 +316,7 @@ def main(experiment,learning_rate=5e-4, batch_size=12, epochs=1,
 
     optimizer = optim.AdamW(model.parameters(), hparams['learning_rate'])
     
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size = int(len(train_loader)))
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size = int(len(train_loader))//4, gamma = 0.2)
 
     iter_meter = IterMeter()
     

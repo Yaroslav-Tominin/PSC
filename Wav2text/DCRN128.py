@@ -15,7 +15,7 @@ class STFT(t.nn.Module):
         #print(sample.shape)
         elems = []
         for x in sample:
-            spec = t.stft(x.squeeze(0), n_fft = 255, hop_length = 1, normalized = True)
+            spec = t.stft(x.squeeze(0), n_fft = 511, hop_length = 1, normalized = True)
             elems.append(spec[None,:])
         res = elems[0]
         for i in range(1,len(elems)):
@@ -90,8 +90,8 @@ class DConv(nn.Module):
 class doubleBLSTM(nn.Module):
     def __init__(self):
         super(doubleBLSTM,self).__init__()
-        self.hidden_size = 128
-        self.lstm = nn.LSTM(input_size = 256,  hidden_size = self.hidden_size, num_layers = 2,
+        self.hidden_size = 256
+        self.lstm = nn.LSTM(input_size = 512,  hidden_size = self.hidden_size, num_layers = 2,
                                bidirectional= True, batch_first=True)
     
     def forward(self, batch_data):
@@ -105,7 +105,7 @@ class doubleBLSTM(nn.Module):
     
 class DCRN(nn.Module):
     
-    def __init__(self, params_enc, params_dec):
+    def __init__(self, params_enc = {"fbins" : [256,128,64,32,16,8,4,2,1], "channels" : [2,32,32,32,32,64,128,256,512]}, params_dec = {"fbins" : [2,4,8,16,32,64,128,256,512], "channels" : [512,256,128,64,32,32,32,32,2]}):
         super(DCRN,self).__init__()
         
         self.fbins_enc = params_enc["fbins"]
@@ -166,8 +166,8 @@ class DCRN(nn.Module):
         #y = self.istft(y.transpose(1,3))
         return y
     
-standard_enc = {"fbins" : [128,64,32,16,8,4,2,1], "channels" : [2,32,32,32,32,64,128,256,512]}
-standard_dec = {"fbins" : [2,4,8,16,32,64,128,256], "channels" : [256,128,64,32,32,32,32,2]}
+standard_enc = {"fbins" : [256,128,64,32,16,8,4,2,1], "channels" : [2,32,32,32,32,32,64,128,256,512]}
+standard_dec = {"fbins" : [2,4,8,16,32,64,128,256,512], "channels" : [256,128,64,32,32,32,32,32,2]}
     
 def custom_loss(pred,target):
     """computes L1 loss separating real and imaginary parts"""
@@ -178,14 +178,15 @@ def custom_loss(pred,target):
     return loss
 
 def test():
-    model = DCRN(standard_enc, standard_dec)
-    x = t.randn((16,2,40,128))
+    model = DCRN()
+    x = t.randn((16,2,40,256))
     #params = model.parameters()
     #print(type(model(x)))
     #model.cuda()
     #x = x.cuda()
     #print(type(model(x)))
     out = model.forward(x)
+    print(out.shape)
     print(custom_loss(x,out))
     print(type(out))
     print(out.shape)
