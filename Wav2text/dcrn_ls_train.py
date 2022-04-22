@@ -164,7 +164,7 @@ def data_processing(data, data_type="train"):
     waves_clean_r = []
     waves_noise_c = []
     waves_clean_c = []
-    print("process")
+   
     waves_noise = []
     waves_clean = []
     for (waveform, _, utterance, _, _, _) in data:
