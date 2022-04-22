@@ -274,7 +274,7 @@ def test(model, device, test_loader, epoch, iter_meter, experiment):
   
     print('Test set: Average loss: {:.4f}\n'.format(test_loss))
 
-def main(experiment,learning_rate=5e-4, batch_size=1, epochs=1,
+def main(experiment,learning_rate=5e-3, batch_size=12, epochs=1,
     train_url="train-clean-100", test_url="test-clean"):
     
     hparams = {
@@ -301,7 +301,7 @@ def main(experiment,learning_rate=5e-4, batch_size=1, epochs=1,
     
     train_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=train_url, download = True)
     test_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=test_url, download = True)
-    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+    kwargs = {'num_workers': 8, 'pin_memory': True} if use_cuda else {}
     train_loader = data.DataLoader(dataset=train_dataset,
                                 batch_size=hparams['batch_size'],
                                 shuffle=True,
