@@ -519,15 +519,16 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             output = model(spectrograms)  # (batch, time, n_class)
             output = F.log_softmax(output, dim=2)
             output = output.transpose(0, 1) # (time, batch, n_class)
-    
+          
             loss = criterion(output, labels, input_lengths, label_lengths)
             
-            out_n = model(spectrograms)  # (batch, time, n_class)
+            out_n = model(noise_spectrograms)  # (batch, time, n_class)
             out_n = F.log_softmax(out_n, dim=2)
-            out_n= output.transpose(0, 1) # (time, batch, n_class)
+            
+            out_n= out_n.transpose(0, 1) # (time, batch, n_class)
             
             loss_n = criterion(out_n, labels, input_lengths, label_lengths)
-            out_dn = model(spectrograms)  # (batch, time, n_class)
+            out_dn = model(dnoise_spectrograms)  # (batch, time, n_class)
             out_dn = F.log_softmax(out_dn, dim=2)
             out_dn = out_dn.transpose(0, 1) # (time, batch, n_class)
     
@@ -609,7 +610,7 @@ def main(experiment,learning_rate=5e-4, batch_size=20, epochs=20,
 
     train_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=train_url, download = True)
     test_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=test_url, download = True)
-    kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
+    kwargs = {'num_workers': 8, 'pin_memory': True} if use_cuda else {}
     train_loader = data.DataLoader(dataset=train_dataset,
                                 batch_size=hparams['batch_size'],
                                 shuffle=True,
