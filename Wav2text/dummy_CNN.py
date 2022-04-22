@@ -13,7 +13,7 @@ class Conv(nn.Module):
                  input_channels, 
                  output_channels,
                  fbins, 
-                 padding = (1,1)
+                 padding = (1,1),
                  kernel_size = 3,
                  stride=(1,1)):
         super(Conv,self).__init__()
