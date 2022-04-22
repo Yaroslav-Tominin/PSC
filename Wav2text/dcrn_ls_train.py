@@ -316,7 +316,7 @@ def main(experiment,learning_rate=5e-4, batch_size=8, epochs=1,
 
     optimizer = optim.AdamW(model.parameters(), hparams['learning_rate'])
     
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size = int(len(train_loader))//4, gamma = 0.2)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size = 500, gamma = 1)
 
     iter_meter = IterMeter()
     
