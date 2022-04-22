@@ -36,15 +36,15 @@ class CNN_test(nn.Module):
         super(CNN_test,self).__init__()
         self.cell1 = Conv(2,32,128)
         self.cell2 = Conv(32,32,128)
-        self.cell3 = Conv(32,64,128)
-        self.cell4 = Conv(64,32,128)
-        self.cell5 = Conv(32,2,128)
+        self.cell3 = Conv(32,2,128)
         
-        self.model = nn.Sequential(self.cell1,self.cell2,self.cell3,self.cell4,self.cell5)
+        
     
     def forward(self,x):
-        return self.model(x)
-
+        y = self.cell1(x)
+        y = self.cell2(y)
+        y = self.cell3(y)
+        return y
 def test():
     model = CNN_test()
     x = torch.randn((16,2,40,128))

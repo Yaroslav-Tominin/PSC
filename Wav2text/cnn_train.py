@@ -171,7 +171,6 @@ def data_processing(data, data_type="train"):
     waves_clean_r = []
     waves_noise_c = []
     waves_clean_c = []
-    print("process")
     waves_noise = []
     waves_clean = []
     for (waveform, _, utterance, _, _, _) in data:
@@ -275,7 +274,7 @@ def test(model, device, test_loader, epoch, iter_meter, experiment):
   
     print('Test set: Average loss: {:.4f}\n'.format(test_loss))
 
-def main(experiment,learning_rate=5e-4, batch_size=12, epochs=1,
+def main(experiment,learning_rate=5e-4, batch_size=1, epochs=1,
     train_url="train-clean-100", test_url="test-clean"):
     
     hparams = {
