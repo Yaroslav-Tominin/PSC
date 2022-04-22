@@ -34,7 +34,7 @@ class Conv(nn.Module):
 class CNN_test(nn.Module):
     def __init__(self):
         super(CNN_test,self).__init__()
-        self.cell1 = Conv(2,32,128, kernel_size=5, padding = (2,2))
+        self.cell1 = Conv(2,32,128)
         self.cell2 = Conv(32,32,128)
         self.cell3 = Conv(32,64,128)
         self.cell4 = Conv(64,32,128)
