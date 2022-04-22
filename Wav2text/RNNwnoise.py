@@ -567,9 +567,9 @@ def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
                 test_loss += loss.item() / len(test_loader)
     
                 decoded_preds, decoded_targets = GreedyDecoder(output.transpose(0, 1), labels, label_lengths)
-                print(decoded_targets)
-                print(decoded_preds)
-                break
+                #print(decoded_targets)
+                #print(decoded_preds)
+                
                 for j in range(len(decoded_preds)):
                     test_cer.append(cer(decoded_targets[j], decoded_preds[j]))
                     test_wer.append(wer(decoded_targets[j], decoded_preds[j]))
@@ -642,7 +642,7 @@ def main(experiment,learning_rate=5e-4, batch_size=20, epochs=20,
     iter_meter = IterMeter()
     
     for epoch in range(1, epochs + 1):
-        #train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment)
+        train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment)
         test(model, device, test_loader, criterion, epoch, iter_meter, experiment)
     torch.save(model.state_dict(), "deepspeech.pt")
     #torch_saver(model)
