@@ -518,22 +518,22 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             optimizer.zero_grad()
     
             output = model(spectrograms)  # (batch, time, n_class)
+            print(output)
             output = F.log_softmax(output, dim=2)
             output = output.transpose(0, 1) # (time, batch, n_class)
           
             loss = criterion(output, labels, input_lengths, label_lengths)
             kl_loss = nn.KLDivLoss()
             out_n = model(noise_spectrograms)  # (batch, time, n_class)
-            out_n = F.log_softmax(out_n, dim=2)
-            
+            out_nl = F.log_softmax(out_n, dim=2)
             out_n= out_n.transpose(0, 1) # (time, batch, n_class)
+            loss_n = criterion(out_nl, labels, input_lengths, label_lengths)
             
-            loss_n = criterion(out_n, labels, input_lengths, label_lengths)
             out_dn = model(dnoise_spectrograms)  # (batch, time, n_class)
             out_dn = F.log_softmax(out_dn, dim=2)
-            out_dn = out_dn.transpose(0, 1) # (time, batch, n_class)
+            out_dnl = out_dn.transpose(0, 1) # (time, batch, n_class)
     
-            loss_dn = criterion(output, labels, input_lengths, label_lengths)
+            loss_dn = criterion(out_dnl, labels, input_lengths, label_lengths)
             
             total_loss = loss+ (loss_n+loss_dn)/2 + kl_loss(out_n,output) + kl_loss(out_dn,output)
             total_loss.backward()
@@ -622,12 +622,12 @@ def main(experiment,learning_rate=5e-4, batch_size=8, epochs=20,
                                 shuffle=False,
                                 collate_fn=lambda x: data_processing(x, 'valid'),
                                 **kwargs)
-    PATH = "deepspeech.pt"
+    #PATH = "deepspeech.pt"
     model = SpeechRecognitionModel(
         hparams['n_cnn_layers'], hparams['n_rnn_layers'], hparams['rnn_dim'],
         hparams['n_class'], hparams['n_feats'], hparams['stride'], hparams['dropout']
         ).to(device)
-    model.load_state_dict(torch.load(PATH, map_location = device))
+    #model.load_state_dict(torch.load(PATH, map_location = device))
     
     print(next(iter(train_loader))[0][0][0].shape)
     #print(plot_spectrogram(next(iter(train_loader))[0][0][0]))
