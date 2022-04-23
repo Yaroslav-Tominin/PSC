@@ -525,8 +525,8 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             loss = criterion(output_l, labels, input_lengths, label_lengths)
             kl_loss = nn.KLDivLoss()
             out_n = model(noise_spectrograms)  # (batch, time, n_class)
-            out_nl = F.log_softmax(out_n, dim=2)
-            out_n= out_n.transpose(0, 1) # (time, batch, n_class)
+            out_n = F.log_softmax(out_n, dim=2)
+            out_nl= out_n.transpose(0, 1) # (time, batch, n_class)
             loss_n = criterion(out_nl, labels, input_lengths, label_lengths)
             
             out_dn = model(dnoise_spectrograms)  # (batch, time, n_class)
