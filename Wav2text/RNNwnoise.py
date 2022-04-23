@@ -505,7 +505,7 @@ class IterMeter(object):
 
 def L_kloss(pred,target):
     res = 0
-    kl_loss = torch.nn.KLDivLoss(reduction = "batch_mean")
+    kl_loss = torch.nn.KLDivLoss(reduction = "batchmean")
    
     for i in range(len(pred)):
         res += kl_loss(pred[i],target[i])
