@@ -503,6 +503,14 @@ class IterMeter(object):
     def get(self):
         return self.val
 
+def L_kloss(pred,target):
+    res = 0
+    kl_loss = torch.nn.KLDivLoss(reduction = "batch_mean")
+   
+    for i in range(len(pred)):
+        res += kl_loss(pred[i],target[i])
+    
+    return res/len(pred)
 
 def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment):
     model.train()
@@ -520,22 +528,22 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             output = model(spectrograms)  # (batch, time, n_class)
     
             output = F.log_softmax(output, dim=2)
-            output_l = output.transpose(0, 1) # (time, batch, n_class)
+            output = output.transpose(0, 1) # (time, batch, n_class)
           
-            loss = criterion(output_l, labels, input_lengths, label_lengths)
-            kl_loss = nn.KLDivLoss(reduction = "batchmean")
+            loss = criterion(output, labels, input_lengths, label_lengths)
+           
             out_n = model(noise_spectrograms)  # (batch, time, n_class)
             out_n = F.log_softmax(out_n, dim=2)
-            out_nl= out_n.transpose(0, 1) # (time, batch, n_class)
-            loss_n = criterion(out_nl, labels, input_lengths, label_lengths)
+            out_n= out_n.transpose(0, 1) # (time, batch, n_class)
+            loss_n = criterion(out_n, labels, input_lengths, label_lengths)
             
             out_dn = model(dnoise_spectrograms)  # (batch, time, n_class)
             out_dn = F.log_softmax(out_dn, dim=2)
-            out_dnl = out_dn.transpose(0, 1) # (time, batch, n_class)
+            out_dn = out_dn.transpose(0, 1) # (time, batch, n_class)
     
-            loss_dn = criterion(out_dnl, labels, input_lengths, label_lengths)
+            loss_dn = criterion(out_dn, labels, input_lengths, label_lengths)
             
-            total_loss = loss+ (loss_n+loss_dn)/2 + kl_loss(out_n,output) + kl_loss(out_dn,output)
+            total_loss = loss+ (loss_n+loss_dn)/2 + L_kloss(out_n,output) + L_kloss(out_dn,output)
             total_loss.backward()
     
             experiment.log_metric('loss', total_loss.item(), step=iter_meter.get())
