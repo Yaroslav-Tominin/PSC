@@ -543,7 +543,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
     
             loss_dn = criterion(out_dn, labels, input_lengths, label_lengths)
             
-            total_loss = loss+ (loss_n+loss_dn)/2 + L_kloss(out_n,output) + L_kloss(out_dn,output)
+            total_loss = loss+ (loss_n+loss_dn)/2
             total_loss.backward()
     
             experiment.log_metric('loss', total_loss.item(), step=iter_meter.get())
@@ -630,12 +630,12 @@ def main(experiment,learning_rate=5e-4, batch_size=8, epochs=20,
                                 shuffle=False,
                                 collate_fn=lambda x: data_processing(x, 'valid'),
                                 **kwargs)
-    #PATH = "deepspeech.pt"
+    PATH = "deepspeech.pt"
     model = SpeechRecognitionModel(
         hparams['n_cnn_layers'], hparams['n_rnn_layers'], hparams['rnn_dim'],
         hparams['n_class'], hparams['n_feats'], hparams['stride'], hparams['dropout']
         ).to(device)
-    #model.load_state_dict(torch.load(PATH, map_location = device))
+    model.load_state_dict(torch.load(PATH, map_location = device))
     
     print(next(iter(train_loader))[0][0][0].shape)
     #print(plot_spectrogram(next(iter(train_loader))[0][0][0]))
