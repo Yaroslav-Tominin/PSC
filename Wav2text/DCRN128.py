@@ -151,7 +151,12 @@ class DCRN(nn.Module):
         for i in range(1,len(self.fbins_enc)):
             self.cell = EConv(self.channels_enc[i-1], self.channels_enc[i], fbins = self.fbins_enc[i])
             #self.dense = E_Dense_Block(self.output_channels,self.output_channels)
-            self.encoder.append(nn.Sequential(self.cell))  
+            if self.channels_enc[i]==32:
+                self.block = Dense_Block(32)
+                self.encoder.append(nn.Sequential(self.cell,self.block))
+            else:
+                self.encoder.append(nn.Sequential(self.cell))
+           
         #self.dense = E_Dense_Block(self.output_channels,self.output_channels)
         #Layers without dense blocks
         #2 BILSTM
@@ -162,13 +167,15 @@ class DCRN(nn.Module):
         #2 Layers without dense block
         for i in range(1,len(self.fbins_dec)):
             self.cell = DConv(self.channels_dec[i-1], self.channels_dec[i],fbins = self.fbins_dec[i])
-            self.decoder.append(nn.Sequential(self.cell))
+            if self.channels_dec[i]==32:
+                self.block = Dense_Block(32)
+                self.decoder.append(nn.Sequential(self.cell,self.block))
+            else:
+                self.decoder.append(nn.Sequential(self.cell))
+         
         #SKIPPING DENSE BLOCKS
         #self.dense = E_Dense_Block(self.output_channels,self.output_channels)
-        self.dense = []
-        for i in range(8):
-            self.block = Dense_Block(32)
-            self.dense.append(self.block)
+       
     def forward(self,batch_data):
         y = batch_data.to(self.device)
         #y = self.stft(y).transpose(1,3)
@@ -181,9 +188,7 @@ class DCRN(nn.Module):
         for x in self.encoder:
             x.to(self.device)
             y = x(y)
-            if self.channels_enc[n_layer_enc]==32:
-                dense_block = self.dense.pop().to(self.device)
-                y = dense_block(y)
+           
                 
                 
             #print(y.shape)
@@ -200,10 +205,7 @@ class DCRN(nn.Module):
             y = t.cat((y,e_con), 3)
             
             y = x(y)
-            if self.channels_dec[n_layer_dec]==32:
-                dense_block = self.dense.pop().to(self.device)
-                y = dense_block(y)
-                print(y.shape)
+            
             n_layer_dec+=1
             #print(y.shape)
         #y = t.istft(y, 256, hop_length = 1)
